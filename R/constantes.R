@@ -25,18 +25,9 @@
 #' média e o
 #' desvio padrão das notas dessa amostra de 300.000 sujeitos nessa mesma
 #' escala. \eqn{X_{i}} representa a nota do sujeito \eqn{i} na escala
-#' dos microdados. \eqn{\overline{Y}} e \eqn{DP_{y}}
+#' dos microdados. \eqn{\overline{X}} e \eqn{DP_{x}}
 #' representam a média e o desvio padrão das notas da amostra nessa
 #' escala.
-
-
-#' Onde as notações com \eqn{Y} e \eqn{y} se referem às notas na escala oficial
-#' do Enem, e as notações com \eqn{X} e \eqn{x} se referem às notas na
-#' escala dos microdados. \eqn{Y_{i}} e \eqn{X_{i}}
-#' correspondem à nota do sujeito \eqn{i}, \eqn{\overline{Y}} e
-#' \eqn{\overline{X}} são a média desses 300.000 sujeitos e
-#' \eqn{DP_{y}} e \eqn{DP_{x}} são o desvio padrão dessa amostra.
-#'
 #'
 #' Nessa
 #' equação, consideramos que as notas padronizadas das duas escalas
