@@ -1,0 +1,88 @@
+---
+title: "microEnem"
+output: github_document
+---
+
+O objetivo do pacote microEnem é facilitar a manipulação dos microdados do Exame Nacional do Ensino Médio (Enem). A versão atual permite calcular a nota de um sujeito que respondeu os itens do Enem 2019 e 2022. A nota é calculada na mesma métrica do Enem. Para instalar pacote, use:
+
+```{r eval=FALSE}
+devtools::install_github('inepoficial/microEnem')
+```
+
+Após a instalação, o pacote é carregado com:
+
+```{r}
+library(microEnem)
+```
+
+Para calcular a nota de um sujeito, use a função `calc.nota`. Eis um exemplo para o ano de 2022:
+
+```{r eval=FALSE}
+# importar primeiros 100 casos dos microdados de 2022 (é preciso direcionar para a pasta onde o arquivo se localiza)
+micro <- data.table::fread('D:/Microdados/Enem/MICRODADOS_ENEM_2022.csv', nrows = 100)
+
+# selecionar os casos do caderno 1065 (LC)
+resp <- subset(micro, micro$CO_PROVA_LC == 1065)
+
+# calcular a nota
+nota <- calc.nota(resps = resp$TX_RESPOSTAS_LC, codigo = 1065, lingua = resp$TP_LINGUA)
+nota
+
+# comparar com a nota oficial
+all.equal(resp$NU_NOTA_LC, nota)
+```
+
+
+Eis um exemplo para o ano de 2019:
+
+```{r eval=FALSE}
+# importar primeiros 100 casos dos microdados de 2019 (é preciso direcionar para a pasta onde o arquivo se localiza)
+micro <- data.table::fread('D:/Microdados/Enem/MICRODADOS_ENEM_2019.csv', nrows = 100)
+
+# selecionar os casos do caderno 511 (LC)
+resp <- subset(micro, micro$CO_PROVA_LC == 511)
+
+# calcular a nota
+nota <- calc.nota(resps = resp$TX_RESPOSTAS_LC, codigo = 511, lingua = resp$TP_LINGUA)
+nota
+
+# comparar com a nota oficial
+all.equal(resp$NU_NOTA_LC, nota)
+```
+
+É importante destacar que desde 2010 nos cadernos de Linguagens e Códigos existem cinco itens de língua inglesa e cinco itens de língua espanhola, por isso, o caderno dessa área possui 50 questões.
+
+Em algumas edições de microdados, o vetor de respostas da variável TX_RESPOSTAS_LC possui 50 caracteres e em outros, 45. Em 2019, o vetor possui 50 caracteres e em 2022, 45. Em ambos os casos, o vetor contém somente a resposta do sujeito à língua estrangeira selecionada no momento da inscrição. No caso do vetor com 50 caracteres, as respostas aos cinco itens da outra língua são marcados com `9`. A função `calc.nota` automaticamente transforma essa resposta `9` em `NA` e esses itens não considerados para o cálculo.
+
+Abaixo estão dois exemplos de cálculo de nota de sujeitos que não fizeram a prova e não estão nos microdados.
+
+
+```{r eval=FALSE}
+# vetor de resposta de uma pessoa fictícia que respondeu o caderno 1065 de LC em 2022 (45 caracteres)
+resp <- c('BBDABBDBAADCBABBADAACBDDDDEACACBCACAABBBECBEC')
+
+# calcular a nota
+nota <- calc.nota(resp, codigo = 1065, lingua = 0)
+nota
+
+# vetor de resposta de uma pessoa fictícia que respondeu o caderno 511 de LC em 2019 (50 caracteres)
+resp <- c('99999BBDABBDBAADCBABBADAACBDDDDEACACBCACAABBBECBEC')
+
+# calcular a nota
+nota <- calc.nota(resp, codigo = 511)
+nota
+
+```
+
+Para separar cada resposta do sujeito que está no vetor único de respostas, use a função `abre.resp`. Isso pode ser útil para utilizar os dados do Enem em outros pacotes, como o mirt.
+
+```{r, eval=FALSE}
+# vetor de resposta único
+resp <- c('BBDABBDBAADCBABBADAACBDDDDEACACBCACAABBBECBEC')
+
+# abrir o vetor de respostas
+resp <- abre.resp(resp)
+resp
+
+```
+
