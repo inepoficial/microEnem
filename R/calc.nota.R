@@ -100,12 +100,12 @@ calc.nota <- function(
   key <- subset(itens, CO_PROVA == codigo)
   key <- dplyr::arrange(key, TP_LINGUA, CO_POSICAO)
 
+  # abrir o vetor de respostas
+  resp <- abre.resp(resps)
+
   # verificar se algum item foi anulado
   anulado <- which(key$IN_ITEM_ABAN == 1)
   key <- subset(key, IN_ITEM_ABAN == 0)
-
-  # abrir o vetor de respostas
-  resp <- abre.resp(resps)
 
   # área e ano do caderno
   area <- dic.cad[dic.cad$codigo == codigo, 'area']
@@ -113,18 +113,26 @@ calc.nota <- function(
 
   # transformar 9 em NA nos itens de língua estrangeira
   if (area == 'LC' & ano != 2009)
-    {
+  {
     resp <- apply(resp, 2, \(x)ifelse(x == '9', NA, x))
 
     if (ano == 2022)
-      if(length(resp) != 45)
-        {stop(paste0('Para o ano de ', ano, ', o vetor de resposta deve ter 45 elementos.'))} else {resp <- insereNA(data = resp, lingua = lingua)}
+      if(ncol(resp) != 45)
+      {stop(paste0('Para o ano de ', ano, ', o vetor de resposta deve ter 45 elementos.'))} else {resp <- insereNA(data = resp, lingua = lingua)}
   }
 
   # retirar o item anulado da resposta
   if (length(anulado) > 0)
     if(length(resps) > 1)
     {resp <- resp[,-anulado]} else {resp <- t(data.frame(resp[-anulado]))}
+
+
+  # # verificar se o tamanho da prova é igual ao tamanho do vetor de respostas
+  # if(ncol(resp) != length(key$TX_GABARITO))
+  #   stop(paste0('O vetor de resposta deve ser do mesmo tamanho da prova. O vetor de respostas possui ',
+  #               ncol(resp), ' caracteres e a prova possui ',
+  #               length(key$TX_GABARITO),
+  #               ' itens.'))
 
   # corrigir as respostas
   resp <- mirt::key2binary(resp, key$TX_GABARITO)
@@ -134,6 +142,10 @@ calc.nota <- function(
 
   # transformação da escala
   nota <- round(nota*constantes[constantes$area == area, 'k'] + constantes[constantes$area == area, 'd'], 1)
+
+  # quem entregou a prova em branco recebe 0
+  branco <- stringr::str_count(resps, "\\.")
+  nota[(branco == 45)] <- 0
 
   return(nota)
 
